@@ -1,4 +1,4 @@
-# 🧠 AG Knowledge Assistant – Agentic & Hybrid RAG System
+# 🧠 RAG Knowledge Assistant – Agentic & Hybrid RAG System
 
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 [![LangChain](https://img.shields.io/badge/Framework-LangChain-1C3C3C.svg?style=flat&logo=chainlink)](https://github.com/langchain-ai/langchain)
