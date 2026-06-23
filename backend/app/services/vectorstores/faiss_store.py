@@ -5,8 +5,11 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_mistralai import MistralAIEmbeddings
-from backend.app import config
-from backend.app.services import doc_processor
+from backend.app.core import config
+from backend.app.core.logging import setup_logger
+from backend.app.services.document_processors import pdf_processor
+
+logger = setup_logger("faiss_store")
 
 def get_embeddings_model(provider: str, api_key: str):
     """
@@ -53,7 +56,7 @@ def load_vectorstore(provider: str, api_key: str) -> Optional[FAISS]:
         embeddings = get_embeddings_model(provider, api_key)
         return FAISS.load_local(path, embeddings, allow_dangerous_deserialization=True)
     except Exception as e:
-        print(f"Error loading FAISS index: {e}")
+        logger.error(f"Error loading FAISS index: {e}")
         return None
 
 def add_documents_to_store(documents: List[Document], provider: str, api_key: str) -> None:
@@ -73,6 +76,7 @@ def add_documents_to_store(documents: List[Document], provider: str, api_key: st
         vectorstore.add_documents(documents)
         
     save_vectorstore(vectorstore, provider)
+    logger.info(f"Added {len(documents)} chunks to FAISS vectorstore for {provider}")
 
 def similarity_search(query: str, provider: str, api_key: str, k: int = 5) -> List[Document]:
     """
@@ -91,13 +95,17 @@ def rebuild_index(provider: str, api_key: str) -> None:
     path = get_vectorstore_path(provider)
     
     # Check if there are files in upload dir
-    files = [f for f in os.listdir(config.UPLOAD_DIR) if f.lower().endswith(".pdf")]
+    if not os.path.exists(config.UPLOAD_DIR):
+        files = []
+    else:
+        files = [f for f in os.listdir(config.UPLOAD_DIR) if f.lower().endswith(".pdf")]
     
     if not files:
         # Clear the index directory
         if os.path.exists(path):
             shutil.rmtree(path)
         os.makedirs(path, exist_ok=True)
+        logger.info(f"Cleared FAISS vectorstore for {provider} as upload dir is empty")
         return
 
     # Ingest all files
@@ -105,15 +113,16 @@ def rebuild_index(provider: str, api_key: str) -> None:
     for filename in files:
         file_path = os.path.join(config.UPLOAD_DIR, filename)
         try:
-            chunks = doc_processor.process_document(file_path, filename)
+            chunks = pdf_processor.process_document(file_path, filename)
             all_documents.extend(chunks)
         except Exception as e:
-            print(f"Error reprocessing document {filename}: {e}")
+            logger.error(f"Error reprocessing document {filename}: {e}")
 
     if all_documents:
         embeddings = get_embeddings_model(provider, api_key)
         vectorstore = FAISS.from_documents(all_documents, embeddings)
         save_vectorstore(vectorstore, provider)
+        logger.info(f"Rebuilt FAISS vectorstore for {provider} with {len(all_documents)} total chunks")
     else:
         # Clear index directory if no documents could be parsed
         if os.path.exists(path):

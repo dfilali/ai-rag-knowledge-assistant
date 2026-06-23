@@ -3,7 +3,10 @@ from typing import List
 from pypdf import PdfReader
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from backend.app import config
+from backend.app.core import config
+from backend.app.core.logging import setup_logger
+
+logger = setup_logger("pdf_processor")
 
 def extract_text_from_pdf(file_path: str) -> List[dict]:
     """
@@ -24,7 +27,7 @@ def extract_text_from_pdf(file_path: str) -> List[dict]:
                     "text": text.strip()
                 })
     except Exception as e:
-        # Log or rethrow with clear error message
+        logger.error(f"Failed to parse PDF file {file_path}: {e}")
         raise RuntimeError(f"Failed to parse PDF file: {str(e)}")
 
     return pages_content
@@ -66,4 +69,5 @@ def process_document(file_path: str, filename: str) -> List[Document]:
             documents.append(Document(page_content=chunk, metadata=metadata))
             chunk_counter += 1
             
+    logger.info(f"Ingested {filename}: split into {chunk_counter} chunks")
     return documents

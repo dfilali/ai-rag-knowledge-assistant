@@ -3,13 +3,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from backend.app.routes import router
+from backend.app.api.router import router
+from backend.app.core.exceptions import RAGBaseException, rag_exception_handler, general_exception_handler
 
 app = FastAPI(
     title="RAG AI Knowledge Assistant",
-    description="A modern, high-performance RAG chatbot for document analysis with built-in evaluation.",
+    description="A modern, high-performance FAANG-ready RAG agent chatbot for document analysis with built-in evaluation.",
     version="1.0.0"
 )
+
+# Register Global Exception Handlers
+app.add_exception_handler(RAGBaseException, rag_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 # Configure CORS for local development flexibility
 app.add_middleware(
@@ -50,3 +55,4 @@ def serve_spa():
 def startup_event():
     # Make sure packages are recognized correctly
     pass
+

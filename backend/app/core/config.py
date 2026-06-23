@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file if it exists
 load_dotenv()
 
-# Project root directory
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# Project root directory (backend/app/core/config.py -> backend/app/core -> backend/app -> backend -> root)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 # Storage Paths
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", str(BASE_DIR / "data" / "uploads"))
@@ -29,6 +29,10 @@ DEFAULT_MISTRAL_MODEL = os.getenv("DEFAULT_MISTRAL_MODEL", "mistral-large-latest
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "200"))
 
+# Advanced Retrieval Configurations
+RETRIEVAL_K = int(os.getenv("RETRIEVAL_K", "10"))       # Number of chunks retrieved initially by dense/sparse
+RERANK_TOP_K = int(os.getenv("RERANK_TOP_K", "5"))       # Number of chunks passed to the LLM after reranking
+
 def get_api_key(provider: str, header_key: str = None) -> str:
     """
     Get the API key for the specified provider.
@@ -41,7 +45,7 @@ def get_api_key(provider: str, header_key: str = None) -> str:
         return header_key
         
     if provider == "openai":
-        return os.getenv("OPENAI_API_KEY", "")
+        return os.getenv("OPENAI_API_KEY", "") or OPENAI_API_KEY
     elif provider == "mistral":
-        return os.getenv("MISTRAL_API_KEY", "")
+        return os.getenv("MISTRAL_API_KEY", "") or MISTRAL_API_KEY
     return ""

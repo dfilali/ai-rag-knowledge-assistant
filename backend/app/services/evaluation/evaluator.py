@@ -2,7 +2,10 @@ import json
 import re
 from typing import List, Dict, Any, Optional
 from langchain_core.messages import SystemMessage, HumanMessage
-from backend.app.services.rag_engine import get_chat_model
+from backend.app.services.llm import get_chat_model
+from backend.app.core.logging import setup_logger
+
+logger = setup_logger("evaluation.evaluator")
 
 def evaluate_rag_response(
     question: str,
@@ -15,7 +18,7 @@ def evaluate_rag_response(
     """
     Evaluates the quality of a RAG response based on:
     1. Faithfulness (Is the answer derived purely from the retrieved context?)
-    2. Answer Relevance (Does the answer address the question directy?)
+    2. Answer Relevance (Does the answer address the question directly?)
     Returns scores out of 5 and descriptions.
     """
     if not contexts:
@@ -69,12 +72,13 @@ def evaluate_rag_response(
         if match:
             json_str = match.group(0)
             eval_data = json.loads(json_str)
+            logger.info("Evaluation completed successfully.")
             return eval_data
         else:
             raise ValueError(f"Could not find JSON in LLM response: {content}")
             
     except Exception as e:
-        print(f"Evaluation error: {e}")
+        logger.error(f"Evaluation error: {e}")
         return {
             "faithfulness_score": -1,
             "faithfulness_reason": f"Evaluation failed: {str(e)}",
