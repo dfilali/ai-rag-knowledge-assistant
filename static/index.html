@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG Knowledge Assistant - Chatbot Documentaire RAG</title>
+    <meta name="description" content="Assistant intelligent RAG pour analyser, indexer et dialoguer avec vos documents et PDF en local.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Panel -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#logo-grad)"/>
+                        <path d="M2 17L12 22L22 17" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6366f1"/>
+                                <stop offset="1" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1>AG Assistant</h1>
+            </div>
+
+            <!-- Configuration Section -->
+            <section class="sidebar-section config-section">
+                <div class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <h2>Configuration</h2>
+                </div>
+                <div class="config-fields">
+                    <div class="form-group">
+                        <label for="provider-select">Fournisseur d'IA</label>
+                        <select id="provider-select">
+                            <option value="openai">OpenAI (GPT-4o-mini)</option>
+                            <option value="mistral">Mistral AI (Mistral Large)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="openai-key-group">
+                        <label for="openai-key-input">Clé API OpenAI</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="openai-key-input" placeholder="sk-proj-..." autocomplete="off">
+                            <span class="status-indicator" id="openai-status"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group hidden" id="mistral-key-group">
+                        <label for="mistral-key-input">Clé API Mistral</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="mistral-key-input" placeholder="Mistral API Key..." autocomplete="off">
+                            <span class="status-indicator" id="mistral-status"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upload Section -->
+            <section class="sidebar-section upload-section">
+                <div class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <h2>Ajouter des Documents</h2>
+                </div>
+                <div class="drop-zone" id="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="upload-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <p>Glissez-déposez un PDF ici</p>
+                        <span>ou cliquez pour parcourir</span>
+                    </div>
+                    <input type="file" id="file-input" accept=".pdf" class="hidden">
+                </div>
+                <div id="upload-progress-container" class="hidden">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="upload-progress-fill"></div>
+                    </div>
+                    <span id="upload-progress-text">Analyse en cours...</span>
+                </div>
+            </section>
+
+            <!-- Document List Section -->
+            <section class="sidebar-section docs-section">
+                <div class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    <h2>Documents Indexés (<span id="doc-count">0</span>)</h2>
+                </div>
+                <div class="doc-list" id="doc-list">
+                    <!-- Dynamic Document Items -->
+                    <div class="doc-list-empty">Aucun document chargé dans la base de connaissances.</div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <!-- Topbar -->
+            <header class="chat-header">
+                <div class="header-info">
+                    <h2>Chatbot IA sur documents</h2>
+                    <span class="active-badge" id="active-model-badge">OpenAI RAG Actif</span>
+                </div>
+                <button class="btn btn-secondary" id="clear-btn" title="Effacer la conversation et réinitialiser la mémoire">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Réinitialiser
+                </button>
+            </header>
+
+            <!-- Message Canvas -->
+            <div class="messages-container" id="messages-container">
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-state-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h2>Prêt à analyser vos documents ?</h2>
+                    <p>Déposez des fichiers PDF dans la barre latérale pour créer votre base de connaissances vectorielle, puis posez vos questions à l'IA.</p>
+                    <div class="empty-state-features">
+                        <div class="feature-tag">📁 Analyse de PDF</div>
+                        <div class="feature-tag">🧠 Mémoire Conversationnelle</div>
+                        <div class="feature-tag">🔍 Sources de Rétraction</div>
+                        <div class="feature-tag">📊 Auto-Évaluation RAG</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <footer class="chat-input-area">
+                <div class="input-panel">
+                    <textarea id="chat-input" placeholder="Posez une question sur vos documents indexés..." rows="1" maxlength="2000"></textarea>
+                    <button id="send-btn" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="send-icon"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Main Application Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

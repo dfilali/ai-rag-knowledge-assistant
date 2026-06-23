@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache & compiles
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Local configuration
+.env
+.env.local
+
+# Local application data (uploads & vector index)
+data/
+uploads/
+
+# IDE / System
+.DS_Store
+.idea/
+.vscode/
+*.swp
